@@ -1,0 +1,8 @@
+# Command 3 "make debug" : debug makefile
+
+# fake target
+.PHONY:debug
+
+# instructions
+debug: CleanUnitTest
+	@echo $(CleanList)

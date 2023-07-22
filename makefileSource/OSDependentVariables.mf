@@ -1,0 +1,22 @@
+include Config.mf
+
+# get OS type
+ifeq ($(OS),)
+	OS := $(shell uname)
+endif
+
+# define variables
+ifeq ($(OS),Windows_NT)
+	RmIfExist = @if exist $1 (rmdir /S /Q $(subst /,\,$1))
+	MkIfNExist = @if not exist $1 (mkdir $(subst /,\,$1))
+	filterfile = $(filter $(SourcePattern),$(shell dir /B /A:-S-D $1))
+	filterdir = $(shell dir /B /A:-SD $1)
+endif
+ifeq ($(OS),Linux)
+	RmIfExist = @if [ -e $1 ] ; then rm -r $1 ; fi
+	MkIfNExist = @if [ ! -e $1 ] ; then mkdir $1 ; fi
+	filterfile = $(filter $(SourcePattern),$(shell ls -l $1 | grep ^- | awk '{print $$9}'))
+	filterdir = $(shell ls -l $1 | grep ^d | awk '{print $$9}')
+endif
+ifeq ($(OS),Darwin)
+endif

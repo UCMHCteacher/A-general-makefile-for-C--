@@ -1,0 +1,40 @@
+# Directories
+SourceDir = ./src
+MainSourceDir = $(SourceDir)/main
+TestSourceDir = $(SourceDir)/test
+
+IncludeDir = ./include
+
+ReleaseDir = ./release
+
+TestDir = ./test
+
+
+
+
+# Sources
+SourcePattern = %.cpp
+
+
+
+
+# Release settings
+ReleaseBinName = liblog.a
+
+# target file type
+# support types: lib, exe
+ReleaseType ?= lib
+
+
+# Compiler
+CC = g++
+CFlags = -fdiagnostics-color=always -g -I $(IncludeDir)
+
+LibCC = ar
+LibFlags = -crv
+
+
+
+
+# make settings
+MakeBin = mingw32-make

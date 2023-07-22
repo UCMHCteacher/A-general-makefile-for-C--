@@ -1,0 +1,55 @@
+# Command EX "make unittest TestFile=<filename>"
+# this makefile will find the source to be tested ``$(MainSourceDir)\$(UnitTestFileBaseName).cpp``
+# and the tester source ``$(TESTERSRC_DIR)\test_$(UnitTestFileBaseName).cpp``
+# compile them to ``$(UnitTestEnvDir)\$(UnitTestFileBaseName).o $(UnitTestEnvDir)\test_$(UnitTestFileBaseName).o``
+# and then link them to generate an executable file ``$(UnitTestEnvDir)\$(UnitTestFileBaseName).exe`` and run
+# this will generate notefile $(UnitTestEnvDir)\$(UnitTestFileBaseName).gcno and data for gcno to use
+# then use gcov to generate coverage report
+
+# fake target
+.PHONY: unittest
+.PHONY: $(UnitTestBin) $(UnitTestMainObj) $(UnitTestObj) UnitTestEnv
+
+# editable variables
+UnitTestFlags = $(CFlags) --coverage -fprofile-abs-path
+
+# computed variables
+UnitTestFileBaseName = $(patsubst %.cpp,%,$(patsubst test_%,%,$(TestFile)))
+UnitTestEnvDir = $(TestDir)/$(UnitTestFileBaseName)
+
+UnitTestMainSrc = $(filter %$(UnitTestFileBaseName).cpp,$(ReleaseSrcs))
+UnitTestSrc = $(patsubst $(MainSourceDir)%,$(TestSourceDir)%,$(dir $(UnitTestMainSrc)))test_$(UnitTestFileBaseName).cpp
+UnitTestMainObj = $(UnitTestEnvDir)/$(UnitTestFileBaseName).o
+UnitTestObj = $(UnitTestEnvDir)/test_$(UnitTestFileBaseName).o
+UnitTestBin = $(UnitTestEnvDir)/$(UnitTestFileBaseName).exe
+
+# instructions
+unittest: UnitTestEnv RunUnitTest
+
+RunUnitTest: $(UnitTestBin)
+	cd $(UnitTestEnvDir) && $(notdir $(UnitTestBin)) && gcov $(notdir $(UnitTestMainSrc)) $(notdir $(UnitTestSrc)) > cov.txt
+
+$(UnitTestBin): $(UnitTestMainObj) $(UnitTestObj)
+	$(CC) $(UnitTestMainObj) $(UnitTestObj) -o $(UnitTestBin) $(UnitTestFlags)
+
+$(UnitTestMainObj): $(UnitTestMainSrc)
+	$(CC) -c $(UnitTestMainSrc) -o $(UnitTestMainObj) $(UnitTestFlags)
+
+$(UnitTestObj): $(UnitTestSrc)
+	$(CC) -c $(UnitTestSrc) -o $(UnitTestObj) $(UnitTestFlags)
+
+UnitTestEnv:
+	$(call MkIfNExist,$(TestDir))
+	$(call MkIfNExist,$(UnitTestEnvDir))
+
+
+
+
+# Command addon "make clean"
+
+# fake target
+.PHONY: CleanUnitTest
+
+# instructions
+CleanUnitTest:
+	$(call RmIfExist,$(TestDir))

@@ -1,0 +1,55 @@
+ifeq ($(ReleaseType),lib)
+
+
+# Command EX "make libtest"
+# this makefile will find $(ReleaseBin) and $(TestSourceDir)/_test.cpp
+# 1. compile $(TestSourceDir)/$(LibTestFileBaseName).cpp to $(TestDir)/$(LibTestFileBaseName)/$(LibTestFileBaseName).o
+# 2. if $(ReleaseBin) is a lib, it will link and generate a executable file in $(TestDir)/$(LibTestFileBaseName)/$(LibTestFileBaseName).exe
+
+# fake target
+.PHONY: libtest
+.PHONY: $(LibTestObj) LibTestEnv
+
+# editable variables
+LibTestFileBaseName = _test
+
+# computed variables
+LibTestEnvDir = $(TestDir)/$(LibTestFileBaseName)
+LibTestSrc = $(TestSourceDir)/$(LibTestFileBaseName).cpp
+LibTestObj = $(LibTestEnvDir)/$(LibTestFileBaseName).o
+LibTestBin = $(LibTestEnvDir)/$(LibTestFileBaseName).exe
+
+# instructions
+libtest: all LibTestEnv $(LibTestObj)
+	$(CC) $(LibTestObj) -o $(LibTestBin) $(CFlags) -L $(ReleaseBinDir) -l$(subst lib,,$(basename $(ReleaseBinName))) 
+
+$(LibTestObj): $(LibTestSrc)
+	$(CC) -c $(LibTestSrc) -o $(LibTestObj) $(CFlags)
+
+LibTestEnv:
+	$(call MkIfNExist,$(TestDir))
+	$(call MkIfNExist,$(LibTestEnvDir))
+
+
+
+
+# Command addon "make clean"
+
+# fake target
+.PHONY: CleanLibTest
+
+# instructions
+CleanLibTest:
+	$(call RmIfExist,$(LibTestEnvDir))
+
+
+else
+
+.PHONY: libtest CleanLibTest
+
+libtest:
+	@echo your target is not a library!
+
+CleanLibTest:
+
+endif

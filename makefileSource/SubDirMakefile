@@ -1,0 +1,17 @@
+# Includes
+include OSDependentVariables.mf
+
+# To use this makefile, you need to set the following variables.
+# NowDir
+# NowDir2MFSrcDir
+
+NowDirSrcs = $(addprefix $(NowDir)/,$(call filterfile))
+SubDirSrcs = $(foreach SubDir,$(call filterdir),$(shell $(MakeBin) -s -C $(SubDir) -f ../$(NowDir2MFSrcDir)/SubDirMakeFile -I ../$(NowDir2MFSrcDir) NowDir=$(NowDir)/$(SubDir) NowDir2MFSrcDir=../$(NowDir2MFSrcDir)))
+
+all:
+ifneq ($(NowDirSrcs),)
+	@echo $(NowDirSrcs)
+endif
+ifneq ($(SubDirSrcs),)
+	@echo $(SubDirSrcs)
+endif

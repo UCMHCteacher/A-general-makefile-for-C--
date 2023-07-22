@@ -1,0 +1,4 @@
+empty = 
+space = $(empty) $(empty)
+
+now2root = $(subst $(space),,$(foreach d,$(filter-out .,$(subst /, ,$1)),../))
